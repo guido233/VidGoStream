@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import threading
-from .speech_synthesis import configure_speech_synthesizer, synthesize_speech
+from .text_to_speech import configure_speech_synthesizer, synthesize_speech
 
 class MTTSGUI:
     def __init__(self, master):
