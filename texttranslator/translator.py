@@ -1,5 +1,6 @@
 import os
 import openai
+import sys
 
 class TextTranslator:
     def __init__(self, api_key):
@@ -55,7 +56,9 @@ class TextTranslator:
             return False
 
 def translate_file(input_file, output_file, target_lang='zh'):
-    api_key = os.environ.get('OPENAI_API_KEY', "sk-HE9F7SkHBKiZ65Pe4_7UfQ78qHD8MF5WNSJGK1fT7kT3BlbkFJZiUPUldl05y_weJkxfJ0ShtwQMgMjF6szkUrcQ1qkA")
+    api_key = os.environ.get('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY 环境变量未设置")
     translator = TextTranslator(api_key)
     return translator.translate_file(input_file, output_file, target_lang)
 
@@ -64,4 +67,11 @@ if __name__ == "__main__":
     output_file = "data/test_translated.txt"  # 替换为您想要的输出文件名
     target_lang = '中文'  # 目标语言，这里设置为中文
 
-    translate_file(input_file, output_file, target_lang)
+    api_key = os.environ.get('OPENAI_API_KEY')
+    translator = TextTranslator(api_key)
+    success = translator.translate_file(input_file, output_file, target_lang)
+
+    if success:
+        print(f"翻译成功完成。结果已保存到 {output_file}")
+    else:
+        print("翻译失败")
