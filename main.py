@@ -10,7 +10,7 @@ def generate_output_filename(prefix, extension):
 
 def main():
     # 设置环境变量和文件路径
-    input_audio_file = "data/test.mp3"
+    input_audio_file = "data/098f6bcd4621d373cade4e832627b4f6.mp3"
     basename_audio_file = os.path.splitext(os.path.basename(input_audio_file))[0]
     
     output_audio = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '_output.mp3')

@@ -21,17 +21,17 @@ class YouTubeDownloader:
                 print(f"CSV表头: {reader.fieldnames}")
                 for row in reader:
                     print(f"读取行: {row}")
-                    uid_key = next((k for k in row.keys() if k.lower().endswith('uid')), None)
-                    if not uid_key or 'URL' not in row:
-                        print(f"警告: 缺少必要的列 (UID 或 URL)，跳过行: {row}")
+                    udi_key = next((k for k in row.keys() if k.lower().endswith('udi')), None)
+                    if not udi_key or 'URL' not in row:
+                        print(f"警告: 缺少必要的列 (UDI 或 URL)，跳过行: {row}")
                         continue
                     
-                    if row.get(uid_key) and row.get('URL'):
+                    if row.get(udi_key) and row.get('URL'):
                         videos.append({
-                            'uid': row[uid_key],
+                            'udi': row[udi_key],
                             'url': row['URL']
                         })
-                        print(f"添加视频: UID={row[uid_key]}, URL={row['URL']}")
+                        print(f"添加视频: UDI={row[udi_key]}, URL={row['URL']}")
         except Exception as e:
             print(f"读取CSV文件时出错: {str(e)}")
             return []
@@ -48,7 +48,7 @@ class YouTubeDownloader:
             # 下载视频
             video_opts = {
                 'format': 'best',  # 最佳视频质量
-                'outtmpl': os.path.join(output_dir, f"{video['uid']}.%(ext)s"),
+                'outtmpl': os.path.join(output_dir, f"{video['udi']}.%(ext)s"),
                 'cookiefile': self.cookies_file,
                 'quiet': False,
                 'no_warnings': False,
@@ -62,7 +62,7 @@ class YouTubeDownloader:
             if need_audio:
                 audio_opts = {
                     'format': 'bestaudio/best',
-                    'outtmpl': os.path.join(output_dir, f"{video['uid']}.%(ext)s"),
+                    'outtmpl': os.path.join(output_dir, f"{video['udi']}.%(ext)s"),
                     'cookiefile': self.cookies_file,
                     'postprocessors': [{
                         'key': 'FFmpegExtractAudio',
@@ -95,11 +95,11 @@ class YouTubeDownloader:
         failed = []
 
         for i, video in enumerate(videos, 1):
-            print(f"正在下载 {i}/{total}: {video['uid']} ({video['url']})")
+            print(f"正在下载 {i}/{total}: {video['udi']} ({video['url']})")
             if self.download_video(video, need_audio):
                 success += 1
             else:
-                failed.append(f"{video['uid']} - {video['url']}")
+                failed.append(f"{video['udi']} - {video['url']}")
 
         print(f"\n下载完成！成功: {success}/{total}")
         if failed:
