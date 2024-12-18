@@ -62,7 +62,7 @@ class YouTubeDownloader:
             if need_audio:
                 audio_opts = {
                     'format': 'bestaudio/best',
-                    'outtmpl': os.path.join(output_dir, f"{video['uid']}_audio.%(ext)s"),
+                    'outtmpl': os.path.join(output_dir, f"{video['uid']}.%(ext)s"),
                     'cookiefile': self.cookies_file,
                     'postprocessors': [{
                         'key': 'FFmpegExtractAudio',

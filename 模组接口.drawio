@@ -1,0 +1,69 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.8 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.8">
+  <diagram name="Page-1" id="7DrZo5Q4PTUOzkyewk0_">
+    <mxGraphModel dx="1804" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="O0aZc2vicXjXFTaPKz-Q-1" target="O0aZc2vicXjXFTaPKz-Q-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-1" value="下载视频模块" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-60" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="O0aZc2vicXjXFTaPKz-Q-2" target="O0aZc2vicXjXFTaPKz-Q-10" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MRJK1ikCr3ncDvP7rgF0-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="O0aZc2vicXjXFTaPKz-Q-2" target="O0aZc2vicXjXFTaPKz-Q-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-2" value="数据存到data文件夹下" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-60" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-4" value="读取vdc.csv文件，下载csv文件中的所有音频和视频" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry y="260" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-9" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;音频翻译模块&lt;/span&gt;" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="230" y="190" width="200" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="O0aZc2vicXjXFTaPKz-Q-9" source="O0aZc2vicXjXFTaPKz-Q-10" target="O0aZc2vicXjXFTaPKz-Q-13" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-10" value="stt" style="rounded=0;whiteSpace=wrap;html=1;" parent="O0aZc2vicXjXFTaPKz-Q-9" vertex="1">
+          <mxGeometry x="40" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="O0aZc2vicXjXFTaPKz-Q-9" source="O0aZc2vicXjXFTaPKz-Q-13" target="O0aZc2vicXjXFTaPKz-Q-14" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-13" value="文本翻译" style="rounded=0;whiteSpace=wrap;html=1;" parent="O0aZc2vicXjXFTaPKz-Q-9" vertex="1">
+          <mxGeometry x="40" y="125" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-14" value="tts" style="rounded=0;whiteSpace=wrap;html=1;" parent="O0aZc2vicXjXFTaPKz-Q-9" vertex="1">
+          <mxGeometry x="40" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="O0aZc2vicXjXFTaPKz-Q-23" target="O0aZc2vicXjXFTaPKz-Q-28" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-23" value="翻译后的音频数据存放在data文件夹下" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="500" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="O0aZc2vicXjXFTaPKz-Q-14" target="O0aZc2vicXjXFTaPKz-Q-23" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-25" value="音频数据" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="90" y="356" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="O0aZc2vicXjXFTaPKz-Q-26" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="320" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-26" value="视频数据" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="60" y="570" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="O0aZc2vicXjXFTaPKz-Q-28" value="将视频和音频合成，得到翻译后的视频" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="260" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

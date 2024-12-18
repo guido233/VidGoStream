@@ -26,3 +26,13 @@ VidGoStream现在支持将VTT字幕文件从一种语言翻译成另一种语言
 
 需要唯一定位的UID，用于识别唯一定位视频项目，
 规则：所有输入的文件和中间产生的文件名称中，都需要携带该UID
+
+
+# 安装依赖模块
+```python
+sudo apt update
+
+python3 -m pip install -U "yt-dlp[default]"
+sudo apt install ffmpeg
+
+```
