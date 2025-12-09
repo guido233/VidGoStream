@@ -1,11 +1,17 @@
 import os
-import openai
+from openai import OpenAI
 import sys
 
 class TextTranslator:
-    def __init__(self, api_key):
+    def __init__(self, api_key, model='glm-4', base_url='https://open.bigmodel.cn/api/paas/v4/'):
         self.api_key = api_key
-        openai.api_key = self.api_key
+        self.model = model
+        self.base_url = base_url
+        # 创建智谱AI客户端
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=self.base_url
+        )
 
     def translate_file(self, input_file, output_file, target_lang='zh'):
         try:
@@ -26,24 +32,27 @@ class TextTranslator:
 
             {text}"""
 
-            # 调用 OpenAI API
-            response = openai.ChatCompletion.create(
-                model="gpt-4",  # 使用 GPT-4 模型
+            # 调用智谱AI API
+            response = self.client.chat.completions.create(
+                model=self.model,  # 使用配置的模型
                 messages=[
-                    {"role": "system", "content": "你是一个专业的视频翻译助手，擅长将YouTube视频的文本翻译成其他语言，并确保翻译结果适合用于语音生成。"},
-                    {"role": "user", "content": prompt}
+                    {
+                        "role": "system",
+                        "content": "你是一个专业的视频翻译助手，擅长将YouTube视频的文本翻译成其他语言，并确保翻译结果适合用于语音生成。"
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
                 ],
                 temperature=0.7,
                 max_tokens=4000,
-                top_p=0.95,
-                frequency_penalty=0,
-                presence_penalty=0,
-                stop=None
+                top_p=0.95
             )
 
             # 提取翻译结果
-            translated_text = response.choices[0].message['content'].strip()
-
+            translated_text = response.choices[0].message.content.strip()
+            
             # 将翻译结果写入输出文件
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(translated_text)
@@ -56,9 +65,9 @@ class TextTranslator:
             return False
 
 def translate_file(input_file, output_file, target_lang='zh'):
-    api_key = os.environ.get('OPENAI_API_KEY')
+    api_key = os.environ.get('ZHIPU_API_KEY')  # 智谱API密钥环境变量
     if not api_key:
-        raise ValueError("OPENAI_API_KEY 环境变量未设置")
+        raise ValueError("ZHIPU_API_KEY 环境变量未设置")
     translator = TextTranslator(api_key)
     return translator.translate_file(input_file, output_file, target_lang)
 
@@ -67,7 +76,11 @@ if __name__ == "__main__":
     output_file = "data/test_translated.txt"  # 替换为您想要的输出文件名
     target_lang = '中文'  # 目标语言，这里设置为中文
 
-    api_key = os.environ.get('OPENAI_API_KEY')
+    api_key = os.environ.get('ZHIPU_API_KEY')  # 智谱API密钥环境变量
+    if not api_key:
+        print("请设置ZHIPU_API_KEY环境变量")
+        sys.exit(1)
+        
     translator = TextTranslator(api_key)
     success = translator.translate_file(input_file, output_file, target_lang)
 

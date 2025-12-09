@@ -1,0 +1,35 @@
+{
+  "stt_models": {
+    "azure": {
+      "class": "AzureSTT",
+      "module": "models.stt_models",
+      "params": {
+        "speech_key": "${AZURE_SPEECH_KEY}",
+        "service_region": "${AZURE_SPEECH_REGION}"
+      }
+    }
+  },
+  "tts_models": {
+    "azure": {
+      "class": "AzureTTS",
+      "module": "models.tts_models",
+      "params": {
+        "subscription": "${AZURE_SPEECH_KEY}",
+        "region": "${AZURE_SPEECH_REGION}",
+        "voice_name": "zh-CN-XiaoxiaoNeural"
+      }
+    }
+  },
+  "translator_models": {
+    "zhipu": {
+      "class": "ZhipuTranslator",
+      "module": "models.translator_models",
+      "params": {
+        "api_key": "${ZHIPU_API_KEY}",
+        "model": "glm-4",
+        "base_url": "https://open.bigmodel.cn/api/paas/v4/"
+      }
+    }
+  }
+}
+

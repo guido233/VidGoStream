@@ -47,9 +47,13 @@ class YouTubeDownloader:
             
             # 下载视频
             video_opts = {
-                'format': 'best',  # 最佳视频质量
+                'format': 'bv*+ba/b',  # 优先分离轨合并，回退为单一最佳文件
                 'outtmpl': os.path.join(output_dir, f"{video['udi']}.%(ext)s"),
                 'cookiefile': self.cookies_file,
+                'merge_output_format': 'mp4',
+                'noplaylist': True,
+                'geo_bypass': True,
+                'ignoreerrors': True,
                 'quiet': False,
                 'no_warnings': False,
                 'extract_flat': False,
@@ -69,6 +73,9 @@ class YouTubeDownloader:
                         'preferredcodec': 'mp3',
                         'preferredquality': '192',
                     }],
+                    'noplaylist': True,
+                    'geo_bypass': True,
+                    'ignoreerrors': True,
                     'quiet': False,
                     'no_warnings': False,
                     'extract_flat': False,
