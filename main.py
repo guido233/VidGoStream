@@ -2,13 +2,14 @@ import os
 import datetime
 import argparse
 from models.factory import ModelFactory
+from videomerger import VideoMerger
 
 def generate_output_filename(prefix, extension):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"{prefix}_{timestamp}.{extension}"
 
 def main(stt_model='azure', tts_model='azure', translator_model='zhipu', 
-         input_audio_file=None, target_lang='中文'):
+         input_audio_file=None, input_video_file=None, target_lang='中文'):
     """
     主函数：处理音频转文字、翻译、文字转语音的完整流程
     
@@ -17,22 +18,35 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         tts_model: 文字转语音模型名称（默认: 'azure'）
         translator_model: 翻译模型名称（默认: 'zhipu'）
         input_audio_file: 输入音频文件路径（如果为None，使用默认路径）
+        input_video_file: 输入视频文件路径（可选，如果提供则会在最后合并视频和音频）
         target_lang: 目标翻译语言（默认: '中文'）
     """
     # 设置文件路径
     if input_audio_file is None:
-        input_audio_file = "data/098f6bcd4621d373cade4e832627b4f6.mp3"
+        input_audio_file = "data/test2.mp3"
     
     if not os.path.exists(input_audio_file):
         print(f"错误: 输入音频文件不存在: {input_audio_file}")
         return
     
     basename_audio_file = os.path.splitext(os.path.basename(input_audio_file))[0]
-    output_audio = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '_output.mp3')
-    output_audio = generate_output_filename(output_audio, "mp3")
+    output_audio_base = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '_output')
+    output_audio = generate_output_filename(output_audio_base, "mp3")
     
-    text_file = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '.txt')
-    translated_text_file = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '_translated.txt')
+    # 如果提供了视频文件，准备输出视频路径
+    output_video = None
+    if input_video_file:
+        if not os.path.exists(input_video_file):
+            print(f"警告: 视频文件不存在: {input_video_file}，将跳过视频合并步骤")
+            input_video_file = None
+        else:
+            basename_video_file = os.path.splitext(os.path.basename(input_video_file))[0]
+            output_video = os.path.join(os.path.dirname(input_video_file), basename_video_file + '_translated.mp4')
+            output_video = generate_output_filename(output_video, "mp4")
+    
+    # 使用SRT文件进行翻译
+    srt_file = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '.srt')
+    translated_srt_file = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '_translated.srt')
 
     try:
         # 创建模型工厂
@@ -53,29 +67,64 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         print(f"检测到的语言: {detected_language}")
         print()
         
-        # 2. 创建并使用翻译模型
+        # 2. 检查SRT文件是否存在
+        if not os.path.exists(srt_file):
+            print(f"错误: SRT文件不存在: {srt_file}")
+            print("请确保STT步骤已成功生成SRT文件")
+            return
+        
+        # 3. 创建并使用翻译模型翻译SRT文件
         print(f"使用翻译模型: {translator_model}")
         translator = factory.create_translator(translator_model)
-        translation_success = translator.translate_file(text_file, translated_text_file, target_lang=target_lang)
+        translation_success = translator.translate_file(srt_file, translated_srt_file, target_lang=target_lang)
         
         if not translation_success:
             print("翻译失败")
             return
         print()
         
-        # 3. 创建并使用文字转语音模型
+        # 4. 创建并使用文字转语音模型（严格按SRT时间轴对齐）
         print(f"使用TTS模型: {tts_model}")
         tts = factory.create_tts(tts_model)
         
-        with open(translated_text_file, 'r', encoding='utf-8') as f:
-            chinese_text = f.read()
-        
-        tts_success = tts.synthesize_speech(chinese_text, output_audio)
+        tmp_dir = f"tmp_srt_tts_{basename_audio_file}"
+        try:
+            tts_success = tts.synthesize_srt_aligned(
+                srt_path=translated_srt_file,
+                out_audio_path=output_audio,
+                tmp_dir=tmp_dir,
+                export_format="mp3",
+                pad_when_short=True,
+                speedup_cap=3.0,
+                slowdown_cap=0.7
+            )
+        finally:
+            # 清理中间目录（可根据需要关闭清理便于调试）
+            try:
+                tts.cleanup_tmp(tmp_dir)
+            except Exception:
+                pass
         
         if tts_success:
-            print(f"中文音频生成成功，保存为 {output_audio}")
+            print(f"✓ 中文音频生成成功，保存为 {output_audio}")
         else:
-            print("中文音频生成失败")
+            print("✗ 中文音频生成失败")
+            return
+        print()
+        
+        # 5. 如果提供了视频文件，合并视频和音频
+        if input_video_file and output_video:
+            print("=" * 50)
+            print("步骤5: 合并视频和音频")
+            print("=" * 50)
+            merger = VideoMerger()
+            merge_success = merger.merge(input_video_file, output_audio, output_video)
+            if merge_success:
+                print(f"✓ 最终视频已生成: {output_video}")
+            else:
+                print("✗ 视频合并失败")
+        elif input_video_file:
+            print("⚠ 视频文件路径无效，跳过合并步骤")
             
     except ValueError as e:
         print(f"错误: {e}")
@@ -95,6 +144,8 @@ if __name__ == "__main__":
                        help='翻译模型名称 (默认: zhipu)')
     parser.add_argument('--input', type=str, default=None, 
                        help='输入音频文件路径')
+    parser.add_argument('--video', type=str, default=None, 
+                       help='输入视频文件路径（可选，如果提供则会在最后合并视频和音频）')
     parser.add_argument('--target-lang', type=str, default='中文', 
                        help='目标翻译语言 (默认: 中文)')
     
@@ -105,5 +156,6 @@ if __name__ == "__main__":
         tts_model=args.tts_model,
         translator_model=args.translator_model,
         input_audio_file=args.input,
+        input_video_file=args.video,
         target_lang=args.target_lang
     )

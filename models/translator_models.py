@@ -20,7 +20,7 @@ class ZhipuTranslator(BaseTranslator):
     
     def translate_file(self, input_file, output_file, target_lang='zh'):
         """
-        翻译文件
+        翻译文件（自动检测SRT格式）
         
         Args:
             input_file: 输入文件路径
@@ -30,5 +30,9 @@ class ZhipuTranslator(BaseTranslator):
         Returns:
             bool: 是否成功
         """
-        return self._translator.translate_file(input_file, output_file, target_lang)
+        # 如果输入文件是SRT格式，使用专门的SRT翻译方法
+        if input_file.lower().endswith('.srt'):
+            return self._translator.translate_srt_file(input_file, output_file, target_lang)
+        else:
+            return self._translator.translate_file(input_file, output_file, target_lang)
 
