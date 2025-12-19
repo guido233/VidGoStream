@@ -52,18 +52,10 @@ class SpeechToText:
         self.speech_key = speech_key
         self.service_region = service_region
 
-    def transcribe(self, audio_file_path, output_prefix: str | None = None):
+    def transcribe(self, audio_file_path):
         # 获取文件的完整路径和文件名
         file_dir, file_name = os.path.split(audio_file_path)
         base_name, file_extension = os.path.splitext(file_name)
-
-        if output_prefix:
-            # 允许外部指定输出前缀，方便在使用“分离后的人声”做STT时仍写回原始位置
-            out_dir, out_base = os.path.split(output_prefix)
-            if out_dir:
-                file_dir = out_dir
-            if out_base:
-                base_name = out_base
 
         # 检查文件是否为MP3格式，如果是，则转换为WAV
         temp_wav_path = None

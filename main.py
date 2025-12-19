@@ -3,7 +3,6 @@ import datetime
 import argparse
 from models.factory import ModelFactory
 from videomerger import VideoMerger
-from audio_utils import AudioSeparator, AudioMixer
 
 def generate_output_filename(prefix, extension):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -32,8 +31,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
     
     basename_audio_file = os.path.splitext(os.path.basename(input_audio_file))[0]
     output_audio_base = os.path.join(os.path.dirname(input_audio_file), basename_audio_file + '_output')
-    voice_output_audio = generate_output_filename(output_audio_base + "_voice", "mp3")
-    mixed_output_audio = generate_output_filename(output_audio_base + "_mixed", "mp3")
+    output_audio = generate_output_filename(output_audio_base, "mp3")
     
     # 如果提供了视频文件，准备输出视频路径
     output_video = None
@@ -43,7 +41,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
             input_video_file = None
         else:
             basename_video_file = os.path.splitext(os.path.basename(input_video_file))[0]
-            output_video = os.path.join(os.path.dirname(input_video_file), basename_video_file + '_translated')
+            output_video = os.path.join(os.path.dirname(input_video_file), basename_video_file + '_translated.mp4')
             output_video = generate_output_filename(output_video, "mp4")
     
     # 使用SRT文件进行翻译
@@ -65,19 +63,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         # 1. 创建并使用语音转文字模型
         print(f"使用STT模型: {stt_model}")
         stt = factory.create_stt(stt_model)
-
-        separator = AudioSeparator()
-        vocals_path, background_path = separator.separate(input_audio_file)
-        stt_audio = vocals_path or input_audio_file
-        if vocals_path:
-            print(f"已分离人声用于识别: {vocals_path}")
-        else:
-            print("提示: 分离人声失败或未启用，将直接用原始音频做识别")
-
-        _, detected_language = stt.transcribe(
-            stt_audio,
-            output_prefix=os.path.splitext(input_audio_file)[0]
-        )
+        _, detected_language = stt.transcribe(input_audio_file)
         print(f"检测到的语言: {detected_language}")
         print()
         
@@ -105,7 +91,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         try:
             tts_success = tts.synthesize_srt_aligned(
                 srt_path=translated_srt_file,
-                out_audio_path=voice_output_audio,
+                out_audio_path=output_audio,
                 tmp_dir=tmp_dir,
                 export_format="mp3",
                 pad_when_short=True,
@@ -119,42 +105,26 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
             except Exception:
                 pass
         
-        if not tts_success:
+        if tts_success:
+            print(f"✓ 中文音频生成成功，保存为 {output_audio}")
+        else:
             print("✗ 中文音频生成失败")
             return
-
-        print(f"✓ 中文人声生成成功，保存为 {voice_output_audio}")
-
-        final_audio_for_video = voice_output_audio
-        if background_path:
-            mixer = AudioMixer()
-            mixed_ok = mixer.mix(background_path, voice_output_audio, mixed_output_audio)
-            if mixed_ok:
-                final_audio_for_video = mixed_output_audio
-            else:
-                print("⚠ 背景与人声混合失败，将使用纯人声")
-        else:
-            print("提示: 未找到可用的背景音，跳过混合")
-
         print()
-
+        
         # 5. 如果提供了视频文件，合并视频和音频
         if input_video_file and output_video:
             print("=" * 50)
             print("步骤5: 合并视频和音频")
             print("=" * 50)
             merger = VideoMerger()
-            merge_success = merger.merge(input_video_file, final_audio_for_video, output_video)
+            merge_success = merger.merge(input_video_file, output_audio, output_video)
             if merge_success:
                 print(f"✓ 最终视频已生成: {output_video}")
             else:
                 print("✗ 视频合并失败")
         elif input_video_file:
             print("⚠ 视频文件路径无效，跳过合并步骤")
-
-        # 如果未合并视频，也输出最终音频路径
-        if not input_video_file:
-            print(f"最终音频路径: {final_audio_for_video}")
             
     except ValueError as e:
         print(f"错误: {e}")
@@ -162,6 +132,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         print(f"发生错误: {str(e)}")
         import traceback
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='VidGoStream: 视频音频处理工具')
