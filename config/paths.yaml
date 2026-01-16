@@ -1,0 +1,28 @@
+# VidGoStream Output File Configuration
+
+# Root directory for a project (video/audio processing task)
+# Available variables: {basename}
+project_root: "data/{basename}"
+
+# Intermediate directory for keeping temp files
+# Available variables: {project_root}
+intermediate_dir: "{project_root}/intermediate"
+
+# File path templates
+# Available variables: {project_root}, {intermediate_dir}, {basename}, {timestamp}
+files:
+  # Subtitles
+  srt: "{intermediate_dir}/{basename}.srt"
+  translated_srt: "{intermediate_dir}/{basename}_translated.srt"
+  
+  # Intermediate Audio
+  tts_audio: "{intermediate_dir}/{basename}_tts.mp3"
+  bg_audio: "{intermediate_dir}/{basename}_bg.mp3"
+  vocals_audio: "{intermediate_dir}/{basename}_vocals.mp3"
+  
+  # Temp folders
+  tmp_tts: "{intermediate_dir}/tmp_srt_tts_{basename}"
+  
+  # Final Outputs
+  final_mix: "{project_root}/{basename}_output_mix_{timestamp}.mp3"
+  final_video: "{project_root}/{basename}_translated_{timestamp}.mp4"

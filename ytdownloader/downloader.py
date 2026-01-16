@@ -4,12 +4,18 @@ import glob
 import yt_dlp
 import subprocess
 from typing import List, Dict
+import sys
+
+# Add project root to sys.path to import path_manager
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.path_manager import PathManager
 
 class YouTubeDownloader:
     def __init__(self):
         # 使用相对路径，兼容性更好
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.cookies_file = os.path.join(base_dir, 'config', 'cookies.txt')
+        self.pm = PathManager()
         
     def read_video_list(self, csv_path: str) -> List[Dict[str, str]]:
         """从CSV文件读取视频信息列表"""
@@ -83,12 +89,13 @@ class YouTubeDownloader:
             return False
 
     def _consolidate_subtitles(self, udi: str, detected_lang: str) -> None:
-        """合并/清理字幕文件，只保留一份最佳字幕，重命名为 {udi}.srt"""
-        output_dir = os.path.join('data')
-        final_path = os.path.join(output_dir, f"{udi}.srt")
+        """合并/清理字幕文件，只保留一份最佳字幕，重命名为 {udi}.srt (存放在 intermediate 目录)"""
+        project_dir = self.pm.get_project_dir(udi)
+        final_path = self.pm.get_path('srt', udi)
         
-        # 查找所有相关字幕 
-        pattern = os.path.join(output_dir, f"{udi}.*.srt")
+        # 查找所有相关字幕 (yt-dlp 默认下载在项目根目录)
+        # 注意: yt-dlp 可能会生成 udi.Code.srt
+        pattern = os.path.join(project_dir, f"{udi}.*.srt")
         candidates = glob.glob(pattern)
         
         # 如果final_path已存在，也纳入考量（为了重新评估或去重）
@@ -146,13 +153,14 @@ class YouTubeDownloader:
     def download_video(self, video: Dict[str, str], need_audio: bool = True) -> bool:
         """下载单个视频（智能跳过、本地提取音频、生成纯视频、下载字幕）"""
         try:
-            output_dir = os.path.join('data')
-            os.makedirs(output_dir, exist_ok=True)
+            # 获取项目目录和路径
+            project_dir = self.pm.get_project_dir(video['udi'])
+            os.makedirs(project_dir, exist_ok=True)
             
-            video_path = os.path.join(output_dir, f"{video['udi']}.mp4")
-            audio_path = os.path.join(output_dir, f"{video['udi']}.mp3")
-            # 最终期望的字幕文件
-            final_sub_path = os.path.join(output_dir, f"{video['udi']}.srt")
+            video_path = os.path.join(project_dir, f"{video['udi']}.mp4")
+            audio_path = os.path.join(project_dir, f"{video['udi']}.mp3")
+            # 最终期望的字幕文件 (在 intermediate 目录)
+            final_sub_path = self.pm.get_path('srt', video['udi'])
 
             # 1. 检查是否存在 (Video & Audio & Subtitles)
             video_exists = os.path.exists(video_path)
@@ -162,7 +170,7 @@ class YouTubeDownloader:
             
             # 如果没找到标准字幕，检查是否有任何相关字幕(可能是上次没合并成功)
             if not subs_exists:
-                pattern = os.path.join(output_dir, f"{video['udi']}*.srt")
+                pattern = os.path.join(project_dir, f"{video['udi']}*.srt")
                 if len(glob.glob(pattern)) > 0:
                      # 或者是未合并的状态，尝试合并一下
                      print(f"Found unmerged subtitles for {video['udi']}, consolidating...")
@@ -202,7 +210,7 @@ class YouTubeDownloader:
             # 配置 yt-dlp 选项
             video_opts = {
                 'format': 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b',
-                'outtmpl': os.path.join(output_dir, f"{video['udi']}.%(ext)s"),
+                'outtmpl': os.path.join(project_dir, f"{video['udi']}.%(ext)s"),
                 'merge_output_format': 'mp4',
                 'noplaylist': True,
                 'geo_bypass': True,

@@ -5,10 +5,9 @@ import subprocess
 from models.factory import ModelFactory
 from videomerger import VideoMerger
 from audio_utils import separate_vocals_background
+from utils.path_manager import PathManager
 
-def generate_output_filename(prefix, extension):
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{prefix}_{timestamp}.{extension}"
+
 
 def _select_codec_args(output_path: str) -> list:
     ext = os.path.splitext(output_path)[1].lower()
@@ -66,29 +65,30 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
     
     basename_audio_file = os.path.splitext(os.path.basename(input_audio_file))[0]
     
-    # 创建项目目录结构
-    project_dir = os.path.join(os.path.dirname(input_audio_file), basename_audio_file)
-    intermediate_dir = os.path.join(project_dir, "intermediate")
-    os.makedirs(intermediate_dir, exist_ok=True)
+    basename_audio_file = os.path.splitext(os.path.basename(input_audio_file))[0]
     
-    # 纯TTS音频放到中间目录
-    output_audio_base = os.path.join(intermediate_dir, basename_audio_file + '_tts')
-    output_audio = generate_output_filename(output_audio_base, "mp3")
+    # 初始化路径管理器
+    pm = PathManager()
     
-    # 如果提供了视频文件，准备输出视频路径（放到项目根目录）
+    # 获取目录（PathManager会自动创建目录）
+    project_dir = pm.get_project_dir(basename_audio_file)
+    intermediate_dir = pm.get_intermediate_dir(basename_audio_file)
+    
+    # 获取音频输出路径
+    output_audio = pm.get_path('tts_audio', basename_audio_file)
+    
+    # 如果提供了视频文件，准备输出视频路径
     output_video = None
     if input_video_file:
         if not os.path.exists(input_video_file):
             print(f"警告: 视频文件不存在: {input_video_file}，将跳过视频合并步骤")
             input_video_file = None
         else:
-            basename_video_file = os.path.splitext(os.path.basename(input_video_file))[0]
-            output_video = os.path.join(project_dir, basename_video_file + '_translated.mp4')
-            output_video = generate_output_filename(output_video, "mp4")
+            output_video = pm.get_path('final_video', basename_audio_file)
     
-    # 使用SRT文件进行翻译（在中间目录）
-    srt_file = os.path.join(intermediate_dir, basename_audio_file + '.srt')
-    translated_srt_file = os.path.join(intermediate_dir, basename_audio_file + '_translated.srt')
+    # SRT文件路径
+    srt_file = pm.get_path('srt', basename_audio_file)
+    translated_srt_file = pm.get_path('translated_srt', basename_audio_file)
 
     try:
         # 创建模型工厂
@@ -129,7 +129,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         print(f"使用TTS模型: {tts_model}")
         tts = factory.create_tts(tts_model)
         
-        tmp_dir = os.path.join(intermediate_dir, f"tmp_srt_tts_{basename_audio_file}")
+        tmp_dir = pm.get_path('tmp_tts', basename_audio_file)
         try:
             tts_success = tts.synthesize_srt_aligned(
                 srt_path=translated_srt_file,
@@ -155,10 +155,8 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         print()
         
         # 5. 使用 spleeter 分离背景音并混合
-        bg_audio_base = os.path.join(intermediate_dir, basename_audio_file + '_bg')
-        bg_audio_path = generate_output_filename(bg_audio_base, "mp3")
-        vocals_audio_base = os.path.join(intermediate_dir, basename_audio_file + '_vocals')
-        vocals_audio_path = generate_output_filename(vocals_audio_base, "mp3")
+        bg_audio_path = pm.get_path('bg_audio', basename_audio_file)
+        vocals_audio_path = pm.get_path('vocals_audio', basename_audio_file)
 
         mix_audio = output_audio
         sep_success = separate_vocals_background(
@@ -169,8 +167,7 @@ def main(stt_model='azure', tts_model='azure', translator_model='zhipu',
         )
         if sep_success:
             # 混合文件放到项目根目录
-            mix_audio_base = os.path.join(project_dir, basename_audio_file + '_output_mix')
-            mix_audio_path = generate_output_filename(mix_audio_base, "mp3")
+            mix_audio_path = pm.get_path('final_mix', basename_audio_file)
             mix_success = _mix_background_and_tts(bg_audio_path, output_audio, mix_audio_path)
             if mix_success:
                 mix_audio = mix_audio_path

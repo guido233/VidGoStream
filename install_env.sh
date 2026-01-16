@@ -38,7 +38,8 @@ conda activate tts
 conda install -c conda-forge ffmpeg -y
 # 安装 Python 依赖
 pip install --upgrade pip
-pip install azure-cognitiveservices-speech pydub openai webvtt-py "googletrans==4.0.0-rc1" yt-dlp
+pip install azure-cognitiveservices-speech pydub openai webvtt-py "googletrans==4.0.0-rc1"
+pip install -U "yt-dlp[default]"
 
 echo " -> 'tts' 环境配置完毕。"
 conda deactivate
