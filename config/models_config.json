@@ -16,7 +16,7 @@
       "params": {
         "subscription": "${AZURE_SPEECH_KEY}",
         "region": "${AZURE_SPEECH_REGION}",
-        "voice_name": "zh-CN-XiaoxiaoNeural"
+        "voice_name": "zh-CN-Xiaoxiao:DragonHDFlashLatestNeural"
       }
     }
   },
@@ -32,4 +32,3 @@
     }
   }
 }
-

@@ -16,6 +16,7 @@ class AzureTTS(BaseTTS):
         self.subscription = subscription
         self.region = region
         self.voice_name = voice_name
+        print(f"DEBUG: Initializing Azure TTS with region: {region}, voice: {voice_name}")
         self._tts = AzureTTSImpl(subscription, region, voice_name)
     
     def synthesize_speech(self, text, output_file):

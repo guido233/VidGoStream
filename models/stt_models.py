@@ -17,15 +17,16 @@ class AzureSTT(BaseSTT):
         self.service_region = service_region
         self._stt = AzureSTTImpl(speech_key, service_region)
     
-    def transcribe(self, audio_file_path):
+    def transcribe(self, audio_file_path, output_dir=None):
         """
         将音频文件转换为文字
         
         Args:
             audio_file_path: 音频文件路径
+            output_dir: 输出目录（可选）
             
         Returns:
             tuple: (识别的文本, 检测到的语言)
         """
-        return self._stt.transcribe(audio_file_path)
+        return self._stt.transcribe(audio_file_path, output_dir=output_dir)
 

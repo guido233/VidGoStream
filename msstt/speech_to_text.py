@@ -52,14 +52,21 @@ class SpeechToText:
         self.speech_key = speech_key
         self.service_region = service_region
 
-    def transcribe(self, audio_file_path):
+    def transcribe(self, audio_file_path, output_dir=None):
+        # 比如给wav文件，如果是其他文件先进行处理
         # 获取文件的完整路径和文件名
         file_dir, file_name = os.path.split(audio_file_path)
         base_name, file_extension = os.path.splitext(file_name)
+        
+        # 确定输出目录
+        save_dir = output_dir if output_dir else file_dir
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir, exist_ok=True)
 
         # 检查文件是否为MP3格式，如果是，则转换为WAV
         temp_wav_path = None
         if file_extension.lower() == '.mp3':
+            # 临时文件仍然放在源目录，或者也可以放在输出目录
             temp_wav_path = os.path.join(file_dir, base_name + '.wav')
             convert_mp3_to_wav(audio_file_path, temp_wav_path)
             audio_file_path = temp_wav_path
@@ -120,8 +127,8 @@ class SpeechToText:
 
         full_text = " ".join(recognized_text)
         
-        # 创建与音频文件同名的文本文件，保存在原始音频文件的相同位置
-        output_txt_path = os.path.join(file_dir, base_name + '.txt')
+        # 创建与音频文件同名的文本文件
+        output_txt_path = os.path.join(save_dir, base_name + '.txt')
         with open(output_txt_path, 'w', encoding='utf-8') as f:
             f.write(full_text)
         
@@ -129,7 +136,7 @@ class SpeechToText:
         
         # 生成SRT格式的字幕文件
         if recognized_segments:
-            output_srt_path = os.path.join(file_dir, base_name + '.srt')
+            output_srt_path = os.path.join(save_dir, base_name + '.srt')
             srt_content = generate_srt(recognized_segments)
             with open(output_srt_path, 'w', encoding='utf-8') as f:
                 f.write(srt_content)

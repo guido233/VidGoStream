@@ -3,7 +3,7 @@ import shutil
 import subprocess
 from typing import Optional
 
-DEFAULT_SPLEETER_PYTHON = "/home/liumeng/miniconda3/envs/spleeter/bin/python"
+DEFAULT_SPLEETER_PYTHON = "/Users/liumeng/miniconda3/envs/spleeter/bin/python"
 
 
 def _probe_channels(audio_path: str) -> Optional[int]:
